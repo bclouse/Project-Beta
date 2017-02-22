@@ -27,7 +27,7 @@ private:
 public:
 	GridWorld(int, int, int, int);
 	int new_state(int,int);
-	int give_reward(int);
+	int get_reward(int);
 	void display(int);
 	bool found_goal(int);
 	void clear();
@@ -44,14 +44,16 @@ private:
 	double e, a, g;	//Epsilon, Alpha, and Gamma
 	int size;
 	int state;
+	int time;
+	int origin;
 public:
 	Agent(int,double,double,double,GridWorld*);
 	void set_state(int);
-	// int greedy();
-	// void update(int);
-	// void decide();
-	// void action();
+	void update(int,int);
+	int decide();
+	void action(int,int);
 	void clear();
+	void display();
 };//*/
 
 //===============================
@@ -60,5 +62,6 @@ public:
 
 void state2coord(int*,int,int);
 int coord2state(int,int,int);
+int rand_maximum(float*, int);
 
 #endif

@@ -6,7 +6,7 @@
 
 GridWorld::GridWorld(int sx, int sy, int gx, int gy) {
 	sizeX = sx; sizeY = sy;
-	goalX = gx; goalY = gy;
+	goalX = gx-1; goalY = gy-1;
 	goal_state = coord2state(goalX, goalY, sizeX);
 
 	int count = 0;
@@ -19,11 +19,33 @@ GridWorld::GridWorld(int sx, int sy, int gx, int gy) {
 	}
 }
 
-int GridWorld::new_state(int,int) {
-
+int GridWorld::new_state(int agent_state, int direction) {
+	switch (direction) {
+		case 0: 				//UP
+			if (agent_state/sizeX != 0) {
+				agent_state -= sizeX;
+			}
+			break;
+		case 1: 				//RIGHT
+			if (agent_state%sizeX != sizeX-1) {
+				agent_state++;
+			}
+			break;
+		case 2: 				//DOWN
+			if (agent_state/sizeX != sizeY-1) {
+				agent_state += sizeX;
+			}
+			break;
+		case 3: 				//LEFT
+			if (agent_state%sizeX != 0) {
+				agent_state--;
+			}
+			break;
+	}
+	return agent_state;
 }
 
-int GridWorld::give_reward(int agent_state) {
+int GridWorld::get_reward(int agent_state) {
 	int reward = 0;
 	if (goal_state == agent_state) {
 		reward += 100;
@@ -54,9 +76,14 @@ void GridWorld::display(int agent_state) {
 }
 
 bool GridWorld::found_goal(int agent_state) {
-	if (goal_state == agent_state)
+	// cout << "Is " << goal_state << " == " << agent_state << endl; 
+	if (goal_state == agent_state) {
+		// cout << "States are the same\n";
 		return true;
-	return false;
+	} else {
+		// cout << "States are NOT the same\n";
+		return false;
+	}
 }
 
 void GridWorld::clear() {
@@ -78,14 +105,76 @@ Agent::Agent(int n, double ep, double alpha, double gamma, GridWorld* grid) {
 		Q_Table[i] = new float[4]();
 	}
 	state = 0;
+	time = 0;
 }
 
 void Agent::set_state(int s) {
-	state = s;
+	origin = state = s;
 }
 
 void Agent::clear() {
 	delete[] Q_Table;
+}
+
+void Agent::display() {
+	cout << "GRID INFO\n";
+	world->display(state);
+	cout << "\nAGENT INFO\n";
+	cout << "Epsilon: " << e << "\nAlpha: " << a << "\nGamma: " << g << endl;
+	/*
+	cout << "Q_Table info:\n";
+	for (int i = 0; i < size; i++) {
+		for (int j = 0; j < 4; j++) {
+			printf("%9f\t",Q_Table[i][j]);
+		}
+		cout << endl;
+	}//*/
+}
+
+void Agent::action(int sizeX, int iter) {
+	int direction;
+	int testing = 0;
+	int nstate;
+	FILE *fp, *path;
+	char name[] = "Learning.txt";
+
+	if (iter == 0) {
+		fp = fopen(name, "w+");
+	} else {
+		fp = fopen(name, "a");
+	}
+
+	//if (iter%100 == 0) {
+
+	//}
+
+	while (!(world->found_goal(state))) {//|| (testing >= 1000))) {
+
+		direction = decide();
+		nstate = world->new_state(state,direction);
+		update(nstate,direction);
+		testing++;
+	}
+	//cout << "Time End: " << testing << endl;
+	fprintf(fp,"%d\t%d\n", iter, testing);
+	fclose(fp);
+	state = origin;
+}
+
+int Agent::decide() {
+	if (ZERO_TO_ONE >= e) {
+		return rand_maximum(Q_Table[state], 4);
+	} else {
+		return (int)rand()%4;
+	}
+}
+
+void Agent::update(int nstate, int dir) {
+	int reward = world->get_reward(nstate);
+	int Qmax = Q_Table[nstate][rand_maximum(Q_Table[nstate],4)];
+
+	Q_Table[state][dir] += a*(reward + g*Qmax - Q_Table[state][dir]);
+	state = nstate;
 }
 
 //===============================
@@ -99,4 +188,19 @@ void state2coord(int loc[2], int sizeX, int state) {
 
 int coord2state(int x, int y, int xsize) {
 	return y*xsize+x;	
+}
+
+int rand_maximum(float arr[], int n) {
+	vector<int> max;
+
+	max.push_back(0);
+	for (int i = 1; i < n; i++) {
+		if (arr[max[0]] < arr[i]) {
+			max.clear();
+			max.push_back(i);
+		} else if (arr[max[0]] == arr[i]) {
+			max.push_back(i);
+		}
+	}
+	return max[rand()%max.size()];
 }
