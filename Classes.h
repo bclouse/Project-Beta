@@ -51,9 +51,10 @@ public:
 	void set_state(int);
 	void update(int,int);
 	int decide();
-	void action(int,int);
+	int action(int);
 	void clear();
 	void display();
+	void reset();
 };//*/
 
 //===============================

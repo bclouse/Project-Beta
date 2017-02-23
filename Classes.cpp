@@ -76,12 +76,9 @@ void GridWorld::display(int agent_state) {
 }
 
 bool GridWorld::found_goal(int agent_state) {
-	// cout << "Is " << goal_state << " == " << agent_state << endl; 
 	if (goal_state == agent_state) {
-		// cout << "States are the same\n";
 		return true;
 	} else {
-		// cout << "States are NOT the same\n";
 		return false;
 	}
 }
@@ -131,34 +128,20 @@ void Agent::display() {
 	}//*/
 }
 
-void Agent::action(int sizeX, int iter) {
+int Agent::action(int sizeX) {
 	int direction;
 	int testing = 0;
 	int nstate;
-	FILE *fp, *path;
-	char name[] = "Learning.txt";
 
-	if (iter == 0) {
-		fp = fopen(name, "w+");
-	} else {
-		fp = fopen(name, "a");
-	}
-
-	//if (iter%100 == 0) {
-
-	//}
-
-	while (!(world->found_goal(state))) {//|| (testing >= 1000))) {
+	while (!(world->found_goal(state))) {
 
 		direction = decide();
 		nstate = world->new_state(state,direction);
 		update(nstate,direction);
 		testing++;
 	}
-	//cout << "Time End: " << testing << endl;
-	fprintf(fp,"%d\t%d\n", iter, testing);
-	fclose(fp);
 	state = origin;
+	return testing;
 }
 
 int Agent::decide() {
@@ -175,6 +158,14 @@ void Agent::update(int nstate, int dir) {
 
 	Q_Table[state][dir] += a*(reward + g*Qmax - Q_Table[state][dir]);
 	state = nstate;
+}
+
+void Agent::reset() {
+	for (int j = 0; j < 4; j++) {
+		for (int i = 0; i < size; i++) {
+			Q_Table[i][j] = 0;
+		}
+	}
 }
 
 //===============================
