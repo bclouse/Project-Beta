@@ -168,6 +168,27 @@ void Agent::reset() {
 	}
 }
 
+void Agent::TestD() {
+	for (int i = 0; i < size; i++) {
+		for (int j = 0; j < 4; j++) {
+			assert(Q_Table[i][j] <= 100);
+		}
+	}
+}
+
+void Agent::TestE() {
+	assert(state == origin);
+}
+
+void Agent::TestF(int min,float val) {
+	float range = min*0.5;
+	assert(val >= min-range && val <= min+range);
+}
+
+void Agent::TestG() {
+	
+}
+
 //===============================
 //	Functions
 //===============================

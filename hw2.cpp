@@ -21,27 +21,33 @@ int main() {
 	int iter = 1000;
 	int sr = 30;
 	int *info = new int[iter]();
-	FILE *learning;
+	FILE *learning; 
+	int min;
 
-	cout << "How large (6-20) do you want the square grid? ";
+	cout << "How large (6-15) do you want the square grid? ";
 	cin >> n;
 	cout << "How many Statisical Runs (1-30)? ";
 	cin >> sr;
+
+	min = 2*n-10;
 
 	int size[2] = {n,n};
 	int goal[2] = {n-2,n-2};
 	GridWorld grid(size[0],size[1],goal[0],goal[1]);
 	Agent Dexter(size[0]*size[1], 0.1, 0.1, 0.9, &grid);
-	int results[4] = {0};
+	//int results[4] = {0};
 
 	Dexter.set_state(2*n+2);
 
 	for (int j = 0; j < sr; j++) {
 		for (int i = 0; i < 1000; i++) {
 			info[i] += Dexter.action(n);
+			Dexter.TestE();
 		}
+		Dexter.TestD();
 		Dexter.reset();
 	}
+	Dexter.TestF(min,(float)info[999]/sr);
 
 	learning = fopen("Learning.txt", "w+");
 	for (int i = 0; i < 1000; i++) {

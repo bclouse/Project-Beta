@@ -55,6 +55,10 @@ public:
 	void clear();
 	void display();
 	void reset();
+	void TestD();
+	void TestE();
+	void TestF(int,float);
+	void TestG();
 };//*/
 
 //===============================
