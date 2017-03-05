@@ -7,42 +7,40 @@
 GridWorld::GridWorld(int sx, int sy, int gx, int gy) {
 	sizeX = sx; sizeY = sy;
 	goalX = gx-1; goalY = gy-1;
+	agentX = 2; agentY = 2;
 	goal_state = coord2state(goalX, goalY, sizeX);
 
 	int count = 0;
 	state_list = new int*[sx]();
 	for (int i = 0; i < sx; i++) {
 		state_list[i] = new int[sy]();
-		for (int j = 0; j < sy; j++) {
-			state_list[i][j] = count++;
-		}
 	}
 }
-
+//*
 int GridWorld::new_state(int agent_state, int direction) {
 	switch (direction) {
 		case 0: 				//UP
-			if (agent_state/sizeX != 0) {
-				agent_state -= sizeX;
+			if (agentY != 0) {
+				agentY--;
 			}
 			break;
 		case 1: 				//RIGHT
-			if (agent_state%sizeX != sizeX-1) {
-				agent_state++;
+			if (agentX != sizeX-1) {
+				agentX++;;
 			}
 			break;
 		case 2: 				//DOWN
-			if (agent_state/sizeX != sizeY-1) {
-				agent_state += sizeX;
+			if (agentY != sizeY-1) {
+				agentY++;;
 			}
 			break;
 		case 3: 				//LEFT
-			if (agent_state%sizeX != 0) {
-				agent_state--;
+			if (agentX != 0) {
+				agentX--;;
 			}
 			break;
 	}
-	return agent_state;
+	return state_list[agentX][agentY];
 }
 
 int GridWorld::get_reward(int agent_state) {
@@ -56,16 +54,11 @@ int GridWorld::get_reward(int agent_state) {
 void GridWorld::display(int agent_state) {
 	int current_state;
 
-	for (int i = 0; i < sizeY; i++) {
-		for (int j = 0; j < sizeX; j++) {
-			current_state = i*sizeX+j;
-			if (current_state == goal_state) {
-				if (agent_state == goal_state) {
-					cout << "O ";
-				} else {
-					cout << "G ";
-				}
-			} else if (current_state == agent_state) {
+	for (int j = 0; j < sizeY; j++) {
+		for (int i = 0; i < sizeX; i++) {
+			if (goalX == i && goalY == j) {
+				cout << "G ";
+			} else if (agentX == i && agentY == j) {
 				cout << "A ";
 			} else {
 				cout << ". ";
@@ -77,13 +70,51 @@ void GridWorld::display(int agent_state) {
 
 bool GridWorld::found_goal(int agent_state) {
 	if (goal_state == agent_state) {
+		agentX = 2; agentY = 2;
 		return true;
 	} else {
 		return false;
 	}
 }
 
+void GridWorld::set_representation(bool grid_representation) {
+	int count = 0;
+
+	if (!grid_representation) goal_state = 4;
+
+	for (int j = 0; j < sizeY; j++) {
+		for (int i = 0; i < sizeX; i++) {
+			if (grid_representation) {
+				state_list[i][j] = count++;
+			} else {
+				if (i < goalX && j < goalY) {				//NW
+					state_list[i][j] = 0;
+				} else if (i == goalX && j < goalY) {	//N
+					state_list[i][j] = 1;
+				} else if (i > goalX && j < goalY) {	//NE
+					state_list[i][j] = 2;
+				} else if (i < goalX && j == goalY) {	//W
+					state_list[i][j] = 3;
+				} else if (i == goalX && j == goalY) {	//GOAL
+					state_list[i][j] = 4;
+				} else if (i > goalX && j == goalY) {	//E
+					state_list[i][j] = 5;
+				} else if (i < goalX && j > goalY) {	//SW
+					state_list[i][j] = 6;
+				} else if (i == goalX && j > goalY) {	//S
+					state_list[i][j] = 7;
+				} else if (i > goalX && j > goalY) {	//SE
+					state_list[i][j] = 8;
+				}
+			}
+		}
+	}
+}
+
 void GridWorld::clear() {
+	for (int i = 0; i < sizeX; i++) {
+		delete[] state_list[i];
+	}
 	delete[] state_list;
 }
 
@@ -110,6 +141,9 @@ void Agent::set_state(int s) {
 }
 
 void Agent::clear() {
+	for (int i = 0; i < size; i++) {
+		delete[] Q_Table[i];
+	}
 	delete[] Q_Table;
 }
 
@@ -128,7 +162,7 @@ void Agent::display() {
 	}//*/
 }
 
-int Agent::action(int sizeX) {
+int Agent::action() {
 	int direction;
 	int testing = 0;
 	int nstate;

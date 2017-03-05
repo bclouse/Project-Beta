@@ -20,38 +20,79 @@ int main() {
 	int n = 20;
 	int iter = 1000;
 	int sr = 30;
-	int *info = new int[iter]();
+	float *info1, *info2, *info3;
 	FILE *learning; 
 	int min;
+	char c;
+	bool grid_rep;
+	int a_size;
 
+	cout << "Do you want a grid representation (Y/N)? ";
+	while (1) {
+		cin >> c;
+		if (c == 'Y') {
+			grid_rep = true;
+			break;
+		} else if (c == 'N') {
+			grid_rep = false;
+			break;
+		} else {
+			cout << "Invalid Input. ";
+		}
+	}
 	cout << "How large (6-15) do you want the square grid? ";
 	cin >> n;
 	cout << "How many Statisical Runs (1-30)? ";
 	cin >> sr;
 
+	info1 = new float[iter]();
+	info2 = new float[iter]();
+	info3 = new float[iter]();
+
 	min = 2*n-10;
 
 	int size[2] = {n,n};
 	int goal[2] = {n-2,n-2};
+	if (grid_rep) {
+		a_size = size[0]*size[1];	
+	} else {
+		a_size = 9;
+	}
 	GridWorld grid(size[0],size[1],goal[0],goal[1]);
-	Agent Dexter(size[0]*size[1], 0.1, 0.1, 0.9, &grid);
-	//int results[4] = {0};
-
-	Dexter.set_state(2*n+2);
+	grid.set_representation(grid_rep);
+	Agent Dexter(a_size, 0.1, 0.1, 0.9, &grid);
+	Agent Jeff  (size[0]*size[1], 0.1, 0.5, 0.9, &grid);
+	Agent Bobby (size[0]*size[1], 0.1, 0.9, 0.9, &grid);
+	if (grid_rep) {
+		Dexter.set_state(2*n+2);
+		Jeff.set_state(2*n+2);
+		Bobby.set_state(2*n+2);
+	} else {
+		Dexter.set_state(0);
+		Jeff.set_state(0);
+		Bobby.set_state(0);
+	}
 
 	for (int j = 0; j < sr; j++) {
 		for (int i = 0; i < 1000; i++) {
-			info[i] += Dexter.action(n);
+			info1[i] += Dexter.action();
+			info2[i] += Jeff.action();
+			info3[i] += Bobby.action();
 			Dexter.TestE();
 		}
+		// if (j == sr-1) {
+		// 	Dexter.display();
+		// }
 		Dexter.TestD();
 		Dexter.reset();
+		Jeff.reset();
+		Bobby.reset();
 	}
-	Dexter.TestF(min,(float)info[999]/sr);
+	Dexter.TestF(min,info1[999]/sr);
 
 	learning = fopen("Learning.txt", "w+");
 	for (int i = 0; i < 1000; i++) {
-		fprintf(learning, "%d\t%.3f\n", i, (float)info[i]/sr);
+		fprintf(learning, "%d\t%.3f\t%.3f\t%.3f\n", i, info1[i]/sr, info2[i]/sr, info3[i]/sr);
 	}
 
 	Dexter.display();
@@ -59,6 +100,10 @@ int main() {
 	fclose(learning);
 	grid.clear();
 	Dexter.clear();
-	delete info;
+	Jeff.clear();
+	Bobby.clear();
+	delete info1;
+	delete info2;
+	delete info3;
 	return 0;
 }

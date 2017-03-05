@@ -22,6 +22,7 @@ class GridWorld {
 private:
 	int sizeX, sizeY;
 	int goalX, goalY;
+	int agentX, agentY;
 	int goal_state;
 	int **state_list;
 public:
@@ -30,6 +31,7 @@ public:
 	int get_reward(int);
 	void display(int);
 	bool found_goal(int);
+	void set_representation(bool);
 	void clear();
 };
 
@@ -51,7 +53,7 @@ public:
 	void set_state(int);
 	void update(int,int);
 	int decide();
-	int action(int);
+	int action();
 	void clear();
 	void display();
 	void reset();
