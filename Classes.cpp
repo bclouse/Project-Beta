@@ -220,7 +220,7 @@ void Agent::TestF(int min,float val) {
 }
 
 void Agent::TestG() {
-	
+	assert(state == origin);
 }
 
 //===============================
