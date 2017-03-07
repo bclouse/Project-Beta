@@ -78,11 +78,12 @@ int main() {
 			info1[i] += Dexter.action();
 			info2[i] += Jeff.action();
 			info3[i] += Bobby.action();
-			Dexter.TestE();
+			if (grid_rep) {
+				Dexter.TestE();
+			} else {
+				Dexter.TestG();
+			}
 		}
-		// if (j == sr-1) {
-		// 	Dexter.display();
-		// }
 		Dexter.TestD();
 		Dexter.reset();
 		Jeff.reset();
